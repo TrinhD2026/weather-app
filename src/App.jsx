@@ -1,35 +1,66 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    const [query,setQuery]=useState("");
+    const [feelLike,setFeelLike]=useState("");
+    const [humidity,setHumidity]=useState("");
+    const [wind,setWind]=useState("");
+    const [precipitation,setPrecipitation]=useState("");
+    return (
+        <>
+            <div className="container__header">
+                <img src="/logo.svg" alt="weather logo" />
+                <button>
+                    <div>
+                        <p>Unit</p>
+                    </div>
+                </button>
+                <ul className="sub-menu" aria-label="Apps">
+                    <li><a href="#">Calendar</a></li>
+                    <li><a href="#">Chat</a></li>
+                    <li><a href="#">Email</a></li>
+                </ul>
+            </div>
+            <div>
+                <h1>How's the sky looking today?</h1>
+                <input
+                    id="search"
+                    type="search"
+                    placeholder="Search..."
+                    aria-describedby="search-description"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                />
+                <button className="wide-btn">Search</button>
+                <div className="container__result">
+                    <div className="container__result-overview">
+                    </div>
+                    <div className="container__result-extra">
+                        <label>Feels Like</label>
+                        <p>{feelLike}</p>
+                    </div>
+                    <div className="container__result-extra">
+                        <label>Humidity</label>
+                        <p>{humidity}</p>
+                    </div>
+                    <div className="container__result-extra">
+                        <label>Wind</label>
+                        <p>{wind}</p>
+                    </div>
+                    <div className="container__result-extra">
+                        <label>Precipitation</label>
+                        <p>{precipitation}</p>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h2>Daily forecast</h2>
+
+            </div>
+        </>
+    )
 }
 
 export default App
