@@ -61,10 +61,15 @@ body {
     background-color: var(--neutral-900);
     color: var(--neutral-0);
     font-weight: 400;
-    padding: 3rem;
+    padding: 3rem 1rem;
+    display: flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items: center;
 }
 
 #root{
+    max-width: 32rem;
 }
 
 li{

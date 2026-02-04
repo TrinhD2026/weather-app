@@ -56,7 +56,12 @@
     top: 0;
     left:0;
     text-align: center;
-    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content:center;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
 }
 
 .container__overall-result .today-result div{
@@ -68,6 +73,11 @@
 .container__overall-result .today-result div img{
     width: 5rem;
     height: 5rem;
+}
+
+.container__overall-result .today-result div p{
+    font-size: 5rem;
+    font-weight: 700;
 }
 
 .container__result-details{
