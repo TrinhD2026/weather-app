@@ -25,6 +25,7 @@ function App() {
     const [month,setMonth]=useState("");
     const [year,setYear]=useState("");
     const [isSubmenuHidden,setIsSubmenuHidden]=useState(true);
+    const [currentIcon,setCurrentIcon]=useState(null);
     const [currentTemp,setCurrentTemp]=useState(null);
     const [feelLike,setFeelLike]=useState(null);
     const [humidity,setHumidity]=useState(null);
@@ -40,7 +41,6 @@ function App() {
         if(!selectedDay)
             return;
 
-        console.log(hourlyTempsCollection);
         const dayTemps=hourlyTempsCollection.find(h => h["day"]===selectedDay);
         if(dayTemps) {
             setHourlyTemps(dayTemps["temps"]);
@@ -92,6 +92,33 @@ function App() {
         return month;
     }
 
+    function convertIcon(weatherCode) {
+        let icon="";
+        if(weatherCode===0) {
+            icon="/icon-sunny.webp";
+        }
+        else if(weatherCode>=1&&weatherCode<=3) {
+            icon="/icon-partly-cloudy.webp";
+        }
+        else if(weatherCode>=4&&weatherCode<=8) {
+            icon="/icon-overcast.webp";
+        }
+        else if(weatherCode>=40&&weatherCode<=49) {
+            icon="/icon-fog.webp";
+        }
+        else if(weatherCode>=50&&weatherCode<=59) {
+            icon="/icon-drizzle.webp";
+        }
+        else if(weatherCode===71||weatherCode===73||weatherCode===75||weatherCode===77||weatherCode===85||weatherCode===86) {
+            icon="/icon-snow.webp";
+        }
+        else if(weatherCode>=95&&weatherCode<=99) {
+            icon="/icon-storm.webp";
+        }
+        
+        return icon;
+    }
+
     function convertDay(dayNum) {
         let day="";
 
@@ -131,7 +158,7 @@ function App() {
                 day: null,
                 minTemp: null,
                 maxTemp: null,
-                icon: "/icon-sunny.webp",
+                icon: "/icon-rain.webp",
             };
 
             const date=new Date(time);
@@ -141,6 +168,10 @@ function App() {
             }
             if(dailyJson["temperature_2m_min"][count]) {
                 temp.minTemp=dailyJson["temperature_2m_min"][count];
+            }
+
+            if(dailyJson["weather_code"][count]) {
+                temp.icon=convertIcon(dailyJson["weather_code"][count]);
             }
             count++;
             temps.push(temp);
@@ -174,7 +205,7 @@ function App() {
             const hourlyTemp={
                 temp: hourlyJson["temperature"][count],
                 hour: datetime.getHours(),
-                icon: "/icon-fog.webp",
+                icon: convertIcon(hourlyJson["weather_code"][count]),
             }
 
             currentTemps.push(hourlyTemp);
@@ -198,15 +229,17 @@ function App() {
         try {
             const longlatRes=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=1&language=en&format=json`);
             const longlatJson=await longlatRes.json();
+            /*console.log(longlatJson.results[0]);*/
             const longtitude=longlatJson.results[0]["longitude"];
             const latitude=longlatJson.results[0]["latitude"];
-            const timezone=longlatJson.results[0]["timezone"];
+            const timezone=longlatJson.results[0]["timezone"] ?? "GMT";
             setSearchName(longlatJson.results[0]["name"]);
             setCountry(longlatJson.results[0]["country"]);
 
-            const weatherData=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}&current=apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,temperature,relative_humidity_2m`);
+            const weatherData=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}&current=apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,temperature,relative_humidity_2m,weather_code`);
             const weatherJson=await weatherData.json();
-           /* console.log(weatherJson["current"]);*/
+            /* console.log(weatherJson);*/
+            setCurrentIcon(convertIcon(weatherJson["current"]["weather_code"]));
             setCurrentTemp(weatherJson["current"]["temperature"]);
             setFeelLike(weatherJson["current"]["apparent_temperature"]);
             setWindSpeed(weatherJson["current"]["wind_speed_10m"]);
@@ -218,12 +251,11 @@ function App() {
             setMonth(convertMonth(dateTime.getMonth()));
             setYear(dateTime.getFullYear());
 
-            const daily=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}&timezone=${timezone}&daily=temperature_2m_min,temperature_2m_max`);
+            const daily=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}&timezone=${timezone}&daily=temperature_2m_min,temperature_2m_max,weather_code`);
             const dailyJson=await daily.json();
-        /*    console.log(dailyJson["daily"]);*/
             handleDailyData(dailyJson["daily"]);
 
-            const hourlyData=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}&hourly=temperature`);
+            const hourlyData=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}&hourly=temperature,weather_code`);
             const hourlyJson=await hourlyData.json();
             handleHourlyData(hourlyJson["hourly"]);
             return true;
@@ -274,7 +306,7 @@ function App() {
                         <h2>{`${searchName}, ${country}`}</h2>
                         <p>{`${day}, ${month} ${date}, ${year}`}</p>
                         <div>
-                            <img src="/icon-sunny.webp"/>
+                            <img src={currentIcon} alt="weather icon" />
                             <p>{currentTemp!=null? `${currentTemp} ${tempUnit}` : ''}</p>
                         </div>
                     </div>
