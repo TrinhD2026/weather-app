@@ -7,8 +7,10 @@ function App() {
     /*const hourlyTempsMap=new Map();*/
 
     const [hourlyTempsCollection,setHourlyTempsCollection]=useState([]);
+    const [unitSetting,setUnitSetting]=useState("metric");
+    const [tempUnitSetting,setTempUnitSetting]=useState("celsius");
     const [tempUnit,setTempUnit]=useState("\u00BAC");
-    const [speedUnit,setSpeedUnit]=useState("km/h");
+    const [speedUnit,setSpeedUnit]=useState("kmh");
     const [precipitationUnit,setPrecipitationUnit]=useState("mm");
 
     const [dailyTemps,setDailyTemps]=useState([]);
@@ -45,7 +47,12 @@ function App() {
         if(dayTemps) {
             setHourlyTemps(dayTemps["temps"]);
         }
+
     },[selectedDay]);
+
+    useEffect(() => {
+        searchWeather();
+    },[unitSetting]);
 
     function convertMonth(monthNum) {
         let month="";
@@ -92,30 +99,52 @@ function App() {
         return month;
     }
 
+    function switchUnitSetting() {
+        if(unitSetting==="metric") {
+            setTempUnit("\u00BAF");
+            setTempUnitSetting("fahrenheit");
+            setPrecipitationUnit("inch");
+            setSpeedUnit("mph");
+        }
+        else {
+            setTempUnit("\u00BAC");
+            setTempUnitSetting("celsius");
+            setPrecipitationUnit("mm");
+            setSpeedUnit("kmh");
+        }
+
+        setUnitSetting(unitSetting==="metric"? "imperial":"metric");
+        setIsSubmenuHidden(true);
+    }
+
     function convertIcon(weatherCode) {
         let icon="";
-        if(weatherCode===0) {
-            icon="/icon-sunny.webp";
-        }
-        else if(weatherCode>=1&&weatherCode<=3) {
+        if(weatherCode>=1&&weatherCode<=3) {
             icon="/icon-partly-cloudy.webp";
         }
         else if(weatherCode>=4&&weatherCode<=8) {
             icon="/icon-overcast.webp";
         }
-        else if(weatherCode>=40&&weatherCode<=49) {
+        else if(weatherCode===28||(weatherCode>=40&&weatherCode<=49)) {
             icon="/icon-fog.webp";
         }
         else if(weatherCode>=50&&weatherCode<=59) {
             icon="/icon-drizzle.webp";
         }
-        else if(weatherCode===71||weatherCode===73||weatherCode===75||weatherCode===77||weatherCode===85||weatherCode===86) {
+        else if((weatherCode>=60&&weatherCode<=69)||(weatherCode>=80&&weatherCode<=84)) {
+            icon="/icon-rain.webp";
+        }
+        else if((weatherCode>=70&&weatherCode<=79)||(weatherCode>=85&&weatherCode<=88)) {
             icon="/icon-snow.webp";
         }
-        else if(weatherCode>=95&&weatherCode<=99) {
+        else if(weatherCode>=95&&weatherCode<=99||weatherCode===17||weatherCode===29) {
             icon="/icon-storm.webp";
         }
-        
+        else {
+            //TODO: weather_code===0 should be sunny? also act as safety nest for other codes. Might need a better logic
+            icon="/icon-sunny.webp";
+        }
+
         return icon;
     }
 
@@ -158,7 +187,7 @@ function App() {
                 day: null,
                 minTemp: null,
                 maxTemp: null,
-                icon: "/icon-rain.webp",
+                icon: "",
             };
 
             const date=new Date(time);
@@ -171,6 +200,7 @@ function App() {
             }
 
             if(dailyJson["weather_code"][count]) {
+                console.log(`weather code ${dailyJson["weather_code"][count]}`);
                 temp.icon=convertIcon(dailyJson["weather_code"][count]);
             }
             count++;
@@ -235,10 +265,25 @@ function App() {
             const timezone=longlatJson.results[0]["timezone"] ?? "GMT";
             setSearchName(longlatJson.results[0]["name"]);
             setCountry(longlatJson.results[0]["country"]);
-
-            const weatherData=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}&current=apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,temperature,relative_humidity_2m,weather_code`);
+            const apiString=`https://api.open-meteo.com/v1/forecast?`;
+            const latitudeString=`latitude=${latitude}`;
+            const longtitudeString=`longitude=${longtitude}`;
+            const windSpeedUnitStr=`wind_speed_unit=${speedUnit}`;
+            const tempUnitStr=`temperature_unit=${tempUnitSetting}`;
+            const precipitationUnitStr=`precipitation_unit=${precipitationUnit}`;
+            const fetchCurrentTemp=`current=apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,temperature,relative_humidity_2m,weather_code`;
+            const fetchDailyTemp=`daily=temperature_2m_min,temperature_2m_max,weather_code`;
+            const fetchHourlyTemp=`hourly=temperature,weather_code`;
+            const commonFetch=`${apiString}${latitudeString}&${longtitudeString}&${windSpeedUnitStr}&${tempUnitStr}&${precipitationUnitStr}`;
+            //const weatherData=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}
+            //&wind_speed_unit=${speedUnit}
+            //&temperature_unit=${tempUnitSetting}
+            //&precipitation_unit=${precipitationUnitSetting}
+            //&current=apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,temperature,relative_humidity_2m,weather_code`);
+            const weatherData=await fetch(`${commonFetch}&${fetchCurrentTemp}`);
             const weatherJson=await weatherData.json();
-            /* console.log(weatherJson);*/
+
+            console.log(weatherJson);
             setCurrentIcon(convertIcon(weatherJson["current"]["weather_code"]));
             setCurrentTemp(weatherJson["current"]["temperature"]);
             setFeelLike(weatherJson["current"]["apparent_temperature"]);
@@ -250,12 +295,11 @@ function App() {
             setDate(dateTime.getDate());
             setMonth(convertMonth(dateTime.getMonth()));
             setYear(dateTime.getFullYear());
-
-            const daily=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}&timezone=${timezone}&daily=temperature_2m_min,temperature_2m_max,weather_code`);
+            const daily=await fetch(`${commonFetch}&timezone=${timezone}&${fetchDailyTemp}`);
             const dailyJson=await daily.json();
             handleDailyData(dailyJson["daily"]);
 
-            const hourlyData=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}&hourly=temperature,weather_code`);
+            const hourlyData=await fetch(`${commonFetch}&${fetchHourlyTemp}`);
             const hourlyJson=await hourlyData.json();
             handleHourlyData(hourlyJson["hourly"]);
             return true;
@@ -276,11 +320,24 @@ function App() {
                     <p>Units</p>
                     <img src="/icon-dropdown.svg" alt="dropdown icon" />
                 </button>
-                <ul className="sub-menu" aria-label="Apps" hidden={isSubmenuHidden}>
-                    <li><a href="#">Calendar</a></li>
-                    <li><a href="#">Chat</a></li>
-                    <li><a href="#">Email</a></li>
-                </ul>
+                <div className="unit-settings" aria-label="unit-settings" hidden={isSubmenuHidden}>
+                    <button onClick={switchUnitSetting}>{unitSetting==="metric"? "Switch to imperial":"Switch to metric"}</button>
+                    <div className="unit-settings__temperature">
+                        <p>Temperature</p>
+                        <p>{`Celsius \u00BAC`}</p>
+                        <p>{`Fehrenheit \u00BAF`}</p>
+                    </div>
+                    <div className="unit-settings__wind-speed">
+                        <p>Wind Speed</p>
+                        <p>{`km/h`}</p>
+                        <p>{`mph`}</p>
+                    </div>
+                    <div className="unit-settings__temperature">
+                        <p>Temperature</p>
+                        <p>{`Celsius \u00BAC`}</p>
+                        <p>{`Fehrenheit \u00BAF`}</p>
+                    </div>
+                </div>
             </div>
             <div>
                 <h1>How's the sky looking today?</h1>
@@ -340,8 +397,8 @@ function App() {
                                     <p>{data.day}</p>
                                     <img src={data.icon} alt="weather icon" />
                                     <div>
-                                        <p>{`${data.maxTemp}\u00BA`}</p>
-                                        <p>{`${data.minTemp}\u00BA`}</p>
+                                        <p>{`${data.maxTemp}${tempUnit}`}</p>
+                                        <p>{`${data.minTemp}${tempUnit}`}</p>
                                     </div>
                                 </li>
                             );
@@ -373,7 +430,7 @@ function App() {
                                 <li key={hourlyTemp.hour}>
                                     <img src={hourlyTemp.icon} alt="weather icon" />
                                     <p>{hourlyTemp.hour}</p>
-                                    <p>{`${hourlyTemp.temp}\u00BA`}</p>
+                                    <p>{`${hourlyTemp.temp}${tempUnit}`}</p>
                                 </li>
                             );
                         })

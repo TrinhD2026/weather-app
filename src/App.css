@@ -5,17 +5,13 @@
     align-items: center;
 }
 
-.sub-menu{
+.unit-settings{
     position: absolute;
     right: 0;
     top: 2.5rem;
     background-color: var(--neutral-800);
     width: 12rem;
-}
-
-.sub-menu li{
-    background-color: var(--neutral-700);
-    margin: 1rem;
+    z-index:10;
 }
 
 .container__search-input{
