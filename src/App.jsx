@@ -1,10 +1,12 @@
-/* eslint-disable react-hooks/immutability */
 import {useState,useEffect} from 'react';
 import './App.css';
+import Header from './components/Header/Header.jsx'
+import CurrentWeather from './components/CurrentWeather/CurrentWeather.jsx';
+import DailyForecast from './components/DailyForecast/DailyForecast.jsx';
+import HourlyForecast from './components/HourlyForecast/HourlyForecast.jsx';
 
 function App() {
-    //all hourly temp for 7 days
-    /*const hourlyTempsMap=new Map();*/
+    const [currentData,setCurrentData]=useState(null);
 
     const [hourlyTempsCollection,setHourlyTempsCollection]=useState([]);
     const [unitSetting,setUnitSetting]=useState("metric");
@@ -14,45 +16,10 @@ function App() {
     const [precipitationUnit,setPrecipitationUnit]=useState("mm");
 
     const [dailyTemps,setDailyTemps]=useState([]);
-    const [selectedDay,setSelectedDay]=useState("");
-
-    //hourly temps in a day
-    const [hourlyTemps,setHourlyTemps]=useState([]);
 
     const [query,setQuery]=useState("");
     const [searchName,setSearchName]=useState("");
     const [country,setCountry]=useState("");
-    const [day,setDay]=useState("");
-    const [date,setDate]=useState("");
-    const [month,setMonth]=useState("");
-    const [year,setYear]=useState("");
-    const [isSubmenuHidden,setIsSubmenuHidden]=useState(true);
-    const [currentIcon,setCurrentIcon]=useState(null);
-    const [currentTemp,setCurrentTemp]=useState(null);
-    const [feelLike,setFeelLike]=useState(null);
-    const [humidity,setHumidity]=useState(null);
-    const [windSpeed,setWindSpeed]=useState(null);
-    const [precipitation,setPrecipitation]=useState(null);
-
-    const handleSelectedDayChange=(event) => {
-        event.preventDefault();
-        setSelectedDay(event.target.value);
-    };
-
-    useEffect(() => {
-        if(!selectedDay)
-            return;
-
-        const dayTemps=hourlyTempsCollection.find(h => h["day"]===selectedDay);
-        if(dayTemps) {
-            setHourlyTemps(dayTemps["temps"]);
-        }
-
-    },[selectedDay]);
-
-    useEffect(() => {
-        searchWeather();
-    },[unitSetting]);
 
     function convertMonth(monthNum) {
         let month="";
@@ -114,7 +81,6 @@ function App() {
         }
 
         setUnitSetting(unitSetting==="metric"? "imperial":"metric");
-        setIsSubmenuHidden(true);
     }
 
     function convertIcon(weatherCode) {
@@ -141,7 +107,7 @@ function App() {
             icon="/icon-storm.webp";
         }
         else {
-            //TODO: weather_code===0 should be sunny? also act as safety nest for other codes. Might need a better logic
+            //TODO: weather_code===0 should be sunny? also act as safety net for other codes. Might need a better logic
             icon="/icon-sunny.webp";
         }
 
@@ -178,9 +144,26 @@ function App() {
         return day;
     }
 
+    function handleCurrentData(currentJson) {
+        const dateTime=new Date(currentJson["current"]["time"]);
+        setCurrentData({
+            currentIcon: convertIcon(currentJson["current"]["weather_code"]),
+            currentTemp: currentJson["current"]["temperature"],
+            feelLike: currentJson["current"]["apparent_temperature"],
+            windSpeed: currentJson["current"]["wind_speed_10m"],
+            precipitation: currentJson["current"]["precipitation"],
+            humidity: currentJson["current"]["relative_humidity_2m"],
+            day: convertDay(dateTime.getDay()),
+            date: dateTime.getDate(),
+            month: convertMonth(dateTime.getMonth()),
+            year: dateTime.getFullYear(),
+        });
+    }
+
     function handleDailyData(dailyJson) {
         let temps=[];
         let count=0;
+        //console.log(dailyJson);
         for(const time of dailyJson["time"]) {
 
             let temp={
@@ -192,17 +175,9 @@ function App() {
 
             const date=new Date(time);
             temp.day=convertDay(date.getDay());
-            if(dailyJson["temperature_2m_max"][count]) {
-                temp.maxTemp=dailyJson["temperature_2m_max"][count];
-            }
-            if(dailyJson["temperature_2m_min"][count]) {
-                temp.minTemp=dailyJson["temperature_2m_min"][count];
-            }
-
-            if(dailyJson["weather_code"][count]) {
-                console.log(`weather code ${dailyJson["weather_code"][count]}`);
-                temp.icon=convertIcon(dailyJson["weather_code"][count]);
-            }
+            temp.maxTemp=dailyJson["temperature_2m_max"][count];
+            temp.minTemp=dailyJson["temperature_2m_min"][count];
+            temp.icon=convertIcon(dailyJson["weather_code"][count]);
             count++;
             temps.push(temp);
         }
@@ -211,7 +186,6 @@ function App() {
     }
 
     function handleHourlyData(hourlyJson) {
-        setSelectedDay("");
         let hourlyTempsArr=[];
         let currentDay="";
         let currentTemps=[];
@@ -235,15 +209,16 @@ function App() {
             const hourlyTemp={
                 temp: hourlyJson["temperature"][count],
                 hour: datetime.getHours(),
+                weatherCode: hourlyJson["weather_code"][count],
                 icon: convertIcon(hourlyJson["weather_code"][count]),
             }
 
             currentTemps.push(hourlyTemp);
-           /* hourlyTempsMap[currentDay].push(hourlyTemp);*/
+            /* hourlyTempsMap[currentDay].push(hourlyTemp);*/
             count++;
         }
 
-        if(currentTemps.length > 0) {
+        if(currentTemps.length>0) {
             hourlyTempsArr.push({
                 day: currentDay,
                 temps: [...currentTemps],
@@ -251,7 +226,7 @@ function App() {
         }
 
         setHourlyTempsCollection(hourlyTempsArr);
-        setHourlyTemps(hourlyTempsArr[0]["temps"]);
+      /*  setHourlyTemps(hourlyTempsArr[0]["temps"]);*/
     }
 
     async function searchWeather() {
@@ -262,10 +237,10 @@ function App() {
             /*console.log(longlatJson.results[0]);*/
             const longtitude=longlatJson.results[0]["longitude"];
             const latitude=longlatJson.results[0]["latitude"];
-            const timezone=longlatJson.results[0]["timezone"] ?? "GMT";
+            const timezone=longlatJson.results[0]["timezone"]??"GMT";
             setSearchName(longlatJson.results[0]["name"]);
             setCountry(longlatJson.results[0]["country"]);
-            const apiString=`https://api.open-meteo.com/v1/forecast?`;
+            const apiString=`https://api.open-meteo.com/v1/forecast`;
             const latitudeString=`latitude=${latitude}`;
             const longtitudeString=`longitude=${longtitude}`;
             const windSpeedUnitStr=`wind_speed_unit=${speedUnit}`;
@@ -274,27 +249,12 @@ function App() {
             const fetchCurrentTemp=`current=apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,temperature,relative_humidity_2m,weather_code`;
             const fetchDailyTemp=`daily=temperature_2m_min,temperature_2m_max,weather_code`;
             const fetchHourlyTemp=`hourly=temperature,weather_code`;
-            const commonFetch=`${apiString}${latitudeString}&${longtitudeString}&${windSpeedUnitStr}&${tempUnitStr}&${precipitationUnitStr}`;
-            //const weatherData=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longtitude}
-            //&wind_speed_unit=${speedUnit}
-            //&temperature_unit=${tempUnitSetting}
-            //&precipitation_unit=${precipitationUnitSetting}
-            //&current=apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,temperature,relative_humidity_2m,weather_code`);
+            const commonFetch=`${apiString}?${latitudeString}&${longtitudeString}&${windSpeedUnitStr}&${tempUnitStr}&${precipitationUnitStr}`;
+
             const weatherData=await fetch(`${commonFetch}&${fetchCurrentTemp}`);
             const weatherJson=await weatherData.json();
+            handleCurrentData(weatherJson);
 
-            console.log(weatherJson);
-            setCurrentIcon(convertIcon(weatherJson["current"]["weather_code"]));
-            setCurrentTemp(weatherJson["current"]["temperature"]);
-            setFeelLike(weatherJson["current"]["apparent_temperature"]);
-            setWindSpeed(weatherJson["current"]["wind_speed_10m"]);
-            setPrecipitation(weatherJson["current"]["precipitation"]);
-            setHumidity(weatherJson["current"]["relative_humidity_2m"]);
-            const dateTime=new Date(weatherJson["current"]["time"]);
-            setDay(convertDay(dateTime.getDay()));
-            setDate(dateTime.getDate());
-            setMonth(convertMonth(dateTime.getMonth()));
-            setYear(dateTime.getFullYear());
             const daily=await fetch(`${commonFetch}&timezone=${timezone}&${fetchDailyTemp}`);
             const dailyJson=await daily.json();
             handleDailyData(dailyJson["daily"]);
@@ -302,141 +262,46 @@ function App() {
             const hourlyData=await fetch(`${commonFetch}&${fetchHourlyTemp}`);
             const hourlyJson=await hourlyData.json();
             handleHourlyData(hourlyJson["hourly"]);
-            return true;
         }
 
         catch(error) {
             console.log(error);
-            return false;
         }
     }
 
+    useEffect(() => {
+        searchWeather();
+    },[unitSetting]);
+
     return (
         <>
-            <div className="container__header">
-                <img src="/logo.svg" alt="weather logo" />
-                <button className="dropdown-btn" onClick={() => setIsSubmenuHidden(!isSubmenuHidden)}>
-                    <img src="/icon-units.svg" alt="units icon" />
-                    <p>Units</p>
-                    <img src="/icon-dropdown.svg" alt="dropdown icon" />
-                </button>
-                <div className="unit-settings" aria-label="unit-settings" hidden={isSubmenuHidden}>
-                    <button onClick={switchUnitSetting}>{unitSetting==="metric"? "Switch to imperial":"Switch to metric"}</button>
-                    <div className="unit-settings__temperature">
-                        <p>Temperature</p>
-                        <p>{`Celsius \u00BAC`}</p>
-                        <p>{`Fehrenheit \u00BAF`}</p>
-                    </div>
-                    <div className="unit-settings__wind-speed">
-                        <p>Wind Speed</p>
-                        <p>{`km/h`}</p>
-                        <p>{`mph`}</p>
-                    </div>
-                    <div className="unit-settings__temperature">
-                        <p>Temperature</p>
-                        <p>{`Celsius \u00BAC`}</p>
-                        <p>{`Fehrenheit \u00BAF`}</p>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <h1>How's the sky looking today?</h1>
-                <div className="container__search-input">
-                    <img src="/icon-search.svg" alt="search icon"/>
-                    <input
-                        id="search"
-                        type="search"
-                        placeholder="Search for a place..."
-                        aria-describedby="search-description"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                    />
-                </div>
-                <button className="wide-btn" onClick={searchWeather}>Search</button>
-                <div className="container__overall-result">
-                    <picture>
-                        <source srcSet="/bg-today-small.svg" media="(max-width: 52rem)" />
-                        <source srcSet="/bg-today-large.svg" media="(min-width: 52rem)" />
-                        <img src="/bg-today-small.svg" alt="today background image"/>
-                    </picture>
-                    <div className="today-result">
-                        <h2>{`${searchName}, ${country}`}</h2>
-                        <p>{`${day}, ${month} ${date}, ${year}`}</p>
-                        <div>
-                            <img src={currentIcon} alt="weather icon" />
-                            <p>{currentTemp!=null? `${currentTemp} ${tempUnit}` : ''}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="container__result-details">
-                    <div >
-                        <label>Feels Like</label>
-                        <p>{feelLike!=null? `${feelLike} ${tempUnit}`:''}</p>
-                    </div>
-                    <div>
-                        <label>Humidity</label>
-                        <p>{humidity!=null ? `${humidity} %` : ''}</p>
-                    </div>
-                    <div>
-                        <label>Wind</label>
-                        <p>{windSpeed!=null? `${windSpeed} ${speedUnit}`:''}</p>
-                    </div>
-                    <div>
-                        <label>Precipitation</label>
-                        <p>{precipitation!=null? `${precipitation} ${precipitationUnit}` : ''}</p>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <h2>Daily forecast</h2>
-                <ul className="container__daily-forecast">
-                    {
-                        dailyTemps.map(data => {
-                            return (
-                                <li key={data.day}>
-                                    <p>{data.day}</p>
-                                    <img src={data.icon} alt="weather icon" />
-                                    <div>
-                                        <p>{`${data.maxTemp}${tempUnit}`}</p>
-                                        <p>{`${data.minTemp}${tempUnit}`}</p>
-                                    </div>
-                                </li>
-                            );
-                        })
-                    }
-                </ul>
-            </div>
-            <div className="container__hourly-forecast">
-                <div className="container__hourly-forecast-header">
-                    <h2>Hourly forecast</h2>
-                    {hourlyTempsCollection.length>0&&(
-                        <select className="select-day" value={selectedDay} onChange={handleSelectedDayChange}>
-                            {
-                                hourlyTempsCollection.map(hourly => {
-                                    return (
-                                        <option key={hourly.day} value={hourly.day}>{hourly.day}</option>
-                                    );
-                                })
-                            }
-                        </select>
-                    )}
-                    
-                </div>
+            <Header unitSetting={unitSetting}
+                switchUnitSetting={switchUnitSetting} />
 
-                <ul>
-                    {
-                        hourlyTemps.map(hourlyTemp => {
-                            return (
-                                <li key={hourlyTemp.hour}>
-                                    <img src={hourlyTemp.icon} alt="weather icon" />
-                                    <p>{hourlyTemp.hour}</p>
-                                    <p>{`${hourlyTemp.temp}${tempUnit}`}</p>
-                                </li>
-                            );
-                        })
-                    }
-                </ul>
+            <h1>How's the sky looking today?</h1>
+            <div className="container__search-input">
+                <img src="/icon-search.svg" alt="search icon" />
+                <input
+                    id="search"
+                    type="search"
+                    placeholder="Search for a place..."
+                    aria-describedby="search-description"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                />
             </div>
+            <button className="wide-btn" onClick={searchWeather}>Search</button>
+            <CurrentWeather
+                currentData={currentData}
+                searchName={searchName}
+                country={country}
+                tempUnit={tempUnit}
+                speedUnit={speedUnit}
+                precipitationUnit={precipitationUnit} />
+            <DailyForecast dailyTemps={dailyTemps}
+                tempUnit={tempUnit} />
+            <HourlyForecast hourlyTempsCollection={hourlyTempsCollection}
+                tempUnit={tempUnit} />
         </>
     )
 }
