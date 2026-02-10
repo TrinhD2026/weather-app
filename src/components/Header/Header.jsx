@@ -34,6 +34,10 @@ function Header({unitSetting,switchUnitSetting=null}) {
                     metricUnit={`Millimiters (mm)`}
                     imperialUnit={`Inches (in)`} />
             </div>
+
+            <div className="wrapper_unit-settings" hidden={isSubmenuHidden} onClick={() => setIsSubmenuHidden(true)}>
+            </div>
+            
         </div>
 
     )

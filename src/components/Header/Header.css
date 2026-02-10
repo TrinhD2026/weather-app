@@ -4,6 +4,15 @@
     justify-content: space-between;
     align-items: center;
 }
+.wrapper_unit-settings{
+    position: fixed;
+    top:0;
+    right:0;
+    min-width: 100vw;
+    min-height: 100vh;
+    background-color: transparent;
+    z-index: 100;
+}
 
 .unit-settings{
     position: absolute;
@@ -11,5 +20,5 @@
     top: 2.5rem;
     background-color: var(--neutral-800);
     width: 12rem;
-    z-index:10;
+    z-index: 101;
 }

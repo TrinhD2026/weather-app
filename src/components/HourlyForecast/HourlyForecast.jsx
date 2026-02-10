@@ -4,12 +4,16 @@ import {useState, useMemo} from 'react';
 import './HourlyForecast.css';
 
 function HourlyForecast({hourlyTempsCollection,tempUnit}) {
-    const [selectedDay,setSelectedDay]=useState("Monday");
+    const [selectedDay,setSelectedDay]=useState("");
 
     const hourlyTemps=useMemo(() => {
         console.log("Filtering items...");
         if(hourlyTempsCollection.length <=0) {
             return [];
+        }
+
+        if(selectedDay==="") {
+            setSelectedDay(hourlyTempsCollection[0].day);
         }
 
         const dayTemps=hourlyTempsCollection.find(h => h["day"]===selectedDay);

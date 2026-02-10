@@ -1,0 +1,33 @@
+.container__hourly-forecast select{
+    height: 2rem;
+    color: var(--neutral-0);
+    background-color: var(--neutral-800);
+    border: 0.1rem solid var(--neutral-600);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.container__hourly-forecast ul{
+}
+
+.container__hourly-forecast li {
+    height: 2.5rem;
+    background-color: var(--neutral-700);
+    border: 0.1rem solid var(--neutral-600);
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    border-radius: 0.5rem;
+    position: relative;
+}
+
+.container__hourly-forecast li p:last-child {
+    position: absolute;
+    right: 1rem;
+}
+
+.container__hourly-forecast li img{
+    width: 2rem;
+    height: 2rem;
+}

@@ -26,7 +26,6 @@ function CurrentWeather({searchName,country,
                         </div>
                     )
                 }
-               
             </div>
             {
                 currentData&&

@@ -1,0 +1,32 @@
+
+.container__daily-forecast{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.container__daily-forecast li{
+    min-width: 5rem;
+    height: 10rem;
+    background-color: var(--neutral-800);
+    border: 0.1rem solid var(--neutral-600);
+    border-radius: 0.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.container__daily-forecast li img {
+    width: 5rem;
+    height: 5rem;
+}
+
+.container__daily-forecast li div{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
