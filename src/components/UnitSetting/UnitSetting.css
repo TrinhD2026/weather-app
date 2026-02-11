@@ -1,0 +1,21 @@
+.unit-setting__label{
+    color:var(--neutral-300);
+    font-size: 0.9rem;
+    text-align:left;
+}
+
+.unit-setting__unit{
+    display: flex;
+    justify-content: space-between;
+    align-items:center;
+}
+.unit-setting__unit:first-of-type{
+    margin: 0.2rem 0;
+}
+.unit-setting{
+    padding-top:0.5rem;
+}
+.unit-setting.border-bottom{
+    border-bottom: 0.15rem solid var(--neutral-600);
+    padding-bottom: 0.5rem;
+}

@@ -4,8 +4,12 @@ import Header from './components/Header/Header.jsx'
 import CurrentWeather from './components/CurrentWeather/CurrentWeather.jsx';
 import DailyForecast from './components/DailyForecast/DailyForecast.jsx';
 import HourlyForecast from './components/HourlyForecast/HourlyForecast.jsx';
+import ApiError from './components/ApiError/ApiError.jsx';
 
 function App() {
+    const [isSearching,setIsSearching]=useState(false);
+    const [isResult,setIsResult]=useState(false);
+    const [isApiError,setIsApiError]=useState(false);
     const [currentData,setCurrentData]=useState(null);
 
     const [hourlyTempsCollection,setHourlyTempsCollection]=useState([]);
@@ -233,7 +237,22 @@ function App() {
 
         try {
             const longlatRes=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=1&language=en&format=json`);
+            if(longlatRes.status!==200) {
+                throw new Error("Failed to fetch api");
+            }
+
             const longlatJson=await longlatRes.json();
+
+            console.log(longlatJson);
+            if(!longlatJson.results) {
+                console.log("no results");
+                if(isApiError) {
+                    setIsApiError(false);
+                }
+                setIsResult(false);
+                return;
+            }
+
             /*console.log(longlatJson.results[0]);*/
             const longtitude=longlatJson.results[0]["longitude"];
             const latitude=longlatJson.results[0]["latitude"];
@@ -252,19 +271,38 @@ function App() {
             const commonFetch=`${apiString}?${latitudeString}&${longtitudeString}&${windSpeedUnitStr}&${tempUnitStr}&${precipitationUnitStr}`;
 
             const weatherData=await fetch(`${commonFetch}&${fetchCurrentTemp}`);
+            if(weatherData.status!==200) {
+                throw new Error("Failed to fetch api");
+            }
+
             const weatherJson=await weatherData.json();
             handleCurrentData(weatherJson);
 
-            const daily=await fetch(`${commonFetch}&timezone=${timezone}&${fetchDailyTemp}`);
-            const dailyJson=await daily.json();
+            const dailyData=await fetch(`${commonFetch}&timezone=${timezone}&${fetchDailyTemp}`);
+            if(dailyData.status!==200) {
+                throw new Error("Failed to fetch api");
+            }
+
+            const dailyJson=await dailyData.json();
             handleDailyData(dailyJson["daily"]);
 
             const hourlyData=await fetch(`${commonFetch}&${fetchHourlyTemp}`);
+            if(hourlyData.status!==200) {
+                throw new Error("Failed to fetch api");
+            }
+
             const hourlyJson=await hourlyData.json();
             handleHourlyData(hourlyJson["hourly"]);
+
+            setIsResult(true);
+            if(isApiError) {
+                setIsApiError(false);
+            }
         }
 
         catch(error) {
+            //API connect error here
+            setIsApiError(true);
             console.log(error);
         }
     }
@@ -277,31 +315,47 @@ function App() {
         <>
             <Header unitSetting={unitSetting}
                 switchUnitSetting={switchUnitSetting} />
-
-            <h1>How's the sky looking today?</h1>
-            <div className="container__search-input">
-                <img src="/icon-search.svg" alt="search icon" />
-                <input
-                    id="search"
-                    type="search"
-                    placeholder="Search for a place..."
-                    aria-describedby="search-description"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                />
-            </div>
-            <button className="wide-btn" onClick={searchWeather}>Search</button>
-            <CurrentWeather
-                currentData={currentData}
-                searchName={searchName}
-                country={country}
-                tempUnit={tempUnit}
-                speedUnit={speedUnit}
-                precipitationUnit={precipitationUnit} />
-            <DailyForecast dailyTemps={dailyTemps}
-                tempUnit={tempUnit} />
-            <HourlyForecast hourlyTempsCollection={hourlyTempsCollection}
-                tempUnit={tempUnit} />
+            {isApiError?
+                (
+                    <ApiError retry={searchWeather} />
+                ):
+                (
+                    <>
+                        <h1>How's the sky looking today?</h1>
+                        <div className="container__search-input">
+                            <img src="/icon-search.svg" alt="search icon" />
+                            <input
+                                id="search"
+                                type="search"
+                                placeholder="Search for a place..."
+                                aria-describedby="search-description"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                            />
+                        </div>
+                        <button className="seacrh-btn" onClick={searchWeather}>Search</button>
+                        {isResult?
+                            (
+                                <>
+                                    <CurrentWeather
+                                        currentData={currentData}
+                                        searchName={searchName}
+                                        country={country}
+                                        tempUnit={tempUnit}
+                                        speedUnit={speedUnit}
+                                        precipitationUnit={precipitationUnit} />
+                                    <DailyForecast dailyTemps={dailyTemps}
+                                        tempUnit={tempUnit} />
+                                    <HourlyForecast hourlyTempsCollection={hourlyTempsCollection}
+                                        tempUnit={tempUnit} />
+                                </>
+                            ):
+                            (
+                                <h2 className="no-result-header">No search result found!</h2>
+                            )}
+                    </>
+                )
+            }
         </>
     )
 }

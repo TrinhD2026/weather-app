@@ -1,0 +1,16 @@
+.container__api-error{
+    text-align:center;
+}
+.container__api-error p{
+    color: var(--neutral-300);
+}
+
+.error-icon{
+    margin: 1rem auto;
+    height: 2rem;
+    width: 2rem;
+}
+
+.container__api-error button{
+    margin: 1rem auto;
+}
