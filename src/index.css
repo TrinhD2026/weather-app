@@ -121,6 +121,21 @@ button{
 .icon-btn:active{
     opacity: 0.6;
 }
+
+.transparent-btn{
+    width:100%;
+    background-color: transparent;
+    border:0;
+    color: var(--neutral-0);
+    text-align: left;
+    padding: 0.4rem;
+    border-radius: 0.3rem;
+}
+
+.transparent-btn:hover{
+    background-color:var(--neutral-600);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   a, button {
     transition: all 0.3s ease-out;

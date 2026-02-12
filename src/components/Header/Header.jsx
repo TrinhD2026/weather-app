@@ -23,23 +23,25 @@ function Header({unitSetting,switchUnitSetting=null}) {
                 <>
                     <div className="unit-settings">
                     <button className="transparent-btn" onClick={toggleUnitSettings}>{unitSetting==="metric"? "Switch to imperial":"Switch to metric"}</button>
-                    <UnitSetting
-                        isBorderBottom={true}
-                        label={"Temperature"}
-                        unitSetting={unitSetting}
-                        metricUnit={`Celsius \u00BAC`}
-                        imperialUnit={`Fehrenheit \u00BAF`} />
-                    <UnitSetting
-                        isBorderBottom={true}
-                        label={"Wind Speed"}
-                        unitSetting={unitSetting}
-                        metricUnit={`km/h`}
-                        imperialUnit={`mph`} />
-                    <UnitSetting
-                        label={"Precipitation"}
-                        unitSetting={unitSetting}
-                        metricUnit={`Millimiters (mm)`}
-                        imperialUnit={`Inches (in)`} />
+                    <div className="unit-settings__settings">
+                        <UnitSetting
+                            isBorderBottom={true}
+                            label={"Temperature"}
+                            unitSetting={unitSetting}
+                            metricUnit={`Celsius \u00BAC`}
+                            imperialUnit={`Fehrenheit \u00BAF`} />
+                        <UnitSetting
+                            isBorderBottom={true}
+                            label={"Wind Speed"}
+                            unitSetting={unitSetting}
+                            metricUnit={`km/h`}
+                            imperialUnit={`mph`} />
+                        <UnitSetting
+                            label={"Precipitation"}
+                            unitSetting={unitSetting}
+                            metricUnit={`Millimiters (mm)`}
+                            imperialUnit={`Inches (in)`} />
+                    </div>
                     </div>
 
                     <div className="wrapper_unit-settings" onClick={() => setIsSubmenuHidden(true)}>

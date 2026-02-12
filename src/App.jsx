@@ -5,8 +5,11 @@ import CurrentWeather from './components/CurrentWeather/CurrentWeather.jsx';
 import DailyForecast from './components/DailyForecast/DailyForecast.jsx';
 import HourlyForecast from './components/HourlyForecast/HourlyForecast.jsx';
 import ApiError from './components/ApiError/ApiError.jsx';
+import SearchOptions from './components/SearchOptions/SearchOptions.jsx';
 
 function App() {
+    const [searchOptions,setSearchOptions]=useState([]);
+    const [showSearchOptions,setShowSearchOptions]=useState(false);
     const [isSearching,setIsSearching]=useState(false);
     const [isResult,setIsResult]=useState(false);
     const [isApiError,setIsApiError]=useState(false);
@@ -230,20 +233,54 @@ function App() {
         }
 
         setHourlyTempsCollection(hourlyTempsArr);
-      /*  setHourlyTemps(hourlyTempsArr[0]["temps"]);*/
     }
 
-    async function searchWeather() {
+    function selectSearchOption(data,searchQuery) {
+        setShowSearchOptions(false);
+        setQuery(searchQuery);
+        setSearchOptions([]);
+    }
 
+    useEffect(() => {
+        if(query.trim()==='') {
+            setSearchOptions([]);
+            return;
+        }
+        const timeoutId=setTimeout(async () => {
+            try {
+                const longlatRes=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=en&format=json`);
+                const data=await longlatRes.json();
+                if(!data.results) {
+                    setSearchOptions([]);
+                    console.log("no results");
+                    if(isApiError) {
+                        setIsApiError(false);
+                    }
+                    setIsResult(false);
+                    return;
+                }
+
+                console.log("there are some results");
+                setSearchOptions(data.results);
+                console.log(data.results);
+            } catch(error) {
+                console.error("Error fetching data:",error);
+            }
+        },700);
+        return () => clearTimeout(timeoutId)
+    },[query]);
+
+    async function searchWeather() {
         try {
-            const longlatRes=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=1&language=en&format=json`);
+            setIsSearching(true);
+
+            const longlatRes=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=en&format=json`);
             if(longlatRes.status!==200) {
                 throw new Error("Failed to fetch api");
             }
 
             const longlatJson=await longlatRes.json();
 
-            console.log(longlatJson);
             if(!longlatJson.results) {
                 console.log("no results");
                 if(isApiError) {
@@ -294,7 +331,10 @@ function App() {
             const hourlyJson=await hourlyData.json();
             handleHourlyData(hourlyJson["hourly"]);
 
-            setIsResult(true);
+            if(!isResult) {
+                setIsResult(true);
+            }
+
             if(isApiError) {
                 setIsApiError(false);
             }
@@ -304,6 +344,9 @@ function App() {
             //API connect error here
             setIsApiError(true);
             console.log(error);
+        }
+        finally {
+            setIsSearching(false);
         }
     }
 
@@ -330,9 +373,18 @@ function App() {
                                 placeholder="Search for a place..."
                                 aria-describedby="search-description"
                                 value={query}
-                                onChange={(e) => setQuery(e.target.value)}
+                                onChange={(e) => {
+                                    setQuery(e.target.value);
+                                    if(!showSearchOptions) {
+                                        setShowSearchOptions(true);
+                                    }
+                                } }
                             />
                         </div>
+                        {(searchOptions.length>0&&showSearchOptions)&&
+                            <SearchOptions searchOptions={searchOptions}
+                                selectSearchOption={selectSearchOption} />
+                        }
                         <button className="seacrh-btn" onClick={searchWeather}>Search</button>
                         {isResult?
                             (
