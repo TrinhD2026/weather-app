@@ -1,9 +1,9 @@
 import React from 'react';
 import './CurrentWeather.css';
 
-function CurrentWeather({searchName,country,
+function CurrentWeather({locationName,
     tempUnit,speedUnit,precipitationUnit,
-    currentData}) {
+    currentWeather}) {
 
     return (
         <div>
@@ -14,38 +14,38 @@ function CurrentWeather({searchName,country,
                     <img src="/bg-today-small.svg" alt="today background image" />
                 </picture>
                 {
-                    currentData&&
+                    currentWeather&&
                     (
                         <div className="today-result">
-                            <h2>{`${searchName}, ${country}`}</h2>
-                            <p>{`${currentData.day}, ${currentData.month} ${currentData.date}, ${currentData.year}`}</p>
+                            <h2>{locationName}</h2>
+                            <p>{`${currentWeather.day}, ${currentWeather.month} ${currentWeather.date}, ${currentWeather.year}`}</p>
                             <div>
-                                <img src={currentData.currentIcon} alt="weather icon" />
-                                <p>{currentData.currentTemp!=null? `${currentData.currentTemp} ${tempUnit}`:''}</p>
+                                <img src={currentWeather.currentIcon} alt="weather icon" />
+                                <p>{currentWeather.currentTemp!=null? `${currentWeather.currentTemp} ${tempUnit}`:''}</p>
                             </div>
                         </div>
                     )
                 }
             </div>
             {
-                currentData&&
+                currentWeather&&
                 (
                     <div className="container__result-details">
-                        <div >
+                        <div>
                             <label>Feels Like</label>
-                            <p>{currentData.feelLike!=null? `${currentData.feelLike} ${tempUnit}`:''}</p>
+                            <p>{currentWeather.feelLike!=null? `${currentWeather.feelLike} ${tempUnit}`:''}</p>
                         </div>
                         <div>
                             <label>Humidity</label>
-                            <p>{currentData.humidity!=null? `${currentData.humidity} %`:''}</p>
+                            <p>{currentWeather.humidity!=null? `${currentWeather.humidity} %`:''}</p>
                         </div>
                         <div>
                             <label>Wind</label>
-                            <p>{currentData.windSpeed!=null? `${currentData.windSpeed} ${speedUnit}`:''}</p>
+                            <p>{currentWeather.windSpeed!=null? `${currentWeather.windSpeed} ${speedUnit}`:''}</p>
                         </div>
                         <div>
                             <label>Precipitation</label>
-                            <p>{currentData.precipitation!=null? `${currentData.precipitation} ${precipitationUnit}`:''}</p>
+                            <p>{currentWeather.precipitation!=null? `${currentWeather.precipitation} ${precipitationUnit}`:''}</p>
                         </div>
                     </div>
                 )

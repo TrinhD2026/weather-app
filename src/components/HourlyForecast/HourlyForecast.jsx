@@ -5,6 +5,7 @@ import './HourlyForecast.css';
 
 function HourlyForecast({hourlyTempsCollection,tempUnit}) {
     const [selectedDay,setSelectedDay]=useState("");
+    const [isSubmenuOpen,setIsSubmenuOpen]=useState(false);
 
     const hourlyTemps=useMemo(() => {
         console.log("Filtering items...");
@@ -24,30 +25,37 @@ function HourlyForecast({hourlyTempsCollection,tempUnit}) {
         return [...dayTemps["temps"]];
     },[selectedDay,hourlyTempsCollection]);
 
-    const handleSelectedDayChange=(event) => {
-        event.preventDefault();
-        setSelectedDay(event.target.value);
-    };
-
     return (
         <div className="container__hourly-forecast">
             <div className="container__hourly-forecast-header">
                 <h2>Hourly forecast</h2>
                 {hourlyTempsCollection.length>0&&(
-                    <select className="select-day" value={selectedDay} onChange={handleSelectedDayChange}>
-                        {
-                            hourlyTempsCollection.map(hourly => {
-                                return (
-                                    <option key={hourly.day} value={hourly.day}>{hourly.day}</option>
-                                );
-                            })
-                        }
-                    </select>
+                    <div className="container__day-selection">
+                        <button className="icon-btn dropdown-btn" onClick={() => setIsSubmenuOpen(!isSubmenuOpen)}>
+                            {selectedDay}
+                            <img src="/icon-dropdown.svg" alt="dropdown icon" />
+                        </button>
+                        {isSubmenuOpen&&(
+                            <ul>
+                                {
+                                    hourlyTempsCollection.map(hourly => {
+                                        return (
+                                            <li key={hourly.day} >
+                                                <button className="transparent-btn" onClick={() => {
+                                                    setSelectedDay(hourly.day);
+                                                    setIsSubmenuOpen(false);
+                                                }}>{hourly.day}</button>
+                                            </li>
+                                        );
+                                    })
+                                }
+                            </ul>
+                        )}
+                    </div>
                 )}
-
             </div>
 
-            <ul>
+            <ul className="hourly-temps">
                 {
                     hourlyTemps && hourlyTemps.map(hourlyTemp => {
                         return (

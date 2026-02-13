@@ -49,6 +49,15 @@
 .container__result-details div{
     border-radius: 0.5rem;
     background-color: var(--neutral-700);
-    height: 5rem;
+    height: 6rem;
     border: 0.1rem solid var(--neutral-600);
+    padding: 1rem;
+}
+.container__result-details div label{
+    color: var(--neutral-300);
+}
+
+.container__result-details div p{
+    margin-top: 1rem;
+    font-size: 1.5rem;
 }

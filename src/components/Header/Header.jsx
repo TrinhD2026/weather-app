@@ -21,9 +21,9 @@ function Header({unitSetting,switchUnitSetting=null}) {
             </button>
             {!isSubmenuHidden&&
                 <>
-                    <div className="unit-settings">
+                    <div className="submenu">
                     <button className="transparent-btn" onClick={toggleUnitSettings}>{unitSetting==="metric"? "Switch to imperial":"Switch to metric"}</button>
-                    <div className="unit-settings__settings">
+                    <div className="submenu__settings">
                         <UnitSetting
                             isBorderBottom={true}
                             label={"Temperature"}
@@ -44,7 +44,7 @@ function Header({unitSetting,switchUnitSetting=null}) {
                     </div>
                     </div>
 
-                    <div className="wrapper_unit-settings" onClick={() => setIsSubmenuHidden(true)}>
+                <div className="wrapper_submenu" onClick={() => setIsSubmenuHidden(true)}>
                     </div>
                 </>
             }

@@ -13,7 +13,8 @@ function App() {
     const [isSearching,setIsSearching]=useState(false);
     const [isResult,setIsResult]=useState(false);
     const [isApiError,setIsApiError]=useState(false);
-    const [currentData,setCurrentData]=useState(null);
+
+    const [currentWeather,setCurrentWeather]=useState(null);
 
     const [hourlyTempsCollection,setHourlyTempsCollection]=useState([]);
     const [unitSetting,setUnitSetting]=useState("metric");
@@ -25,8 +26,7 @@ function App() {
     const [dailyTemps,setDailyTemps]=useState([]);
 
     const [query,setQuery]=useState("");
-    const [searchName,setSearchName]=useState("");
-    const [country,setCountry]=useState("");
+    const [locationName,setLocationName]=useState("");
 
     function convertMonth(monthNum) {
         let month="";
@@ -151,9 +151,9 @@ function App() {
         return day;
     }
 
-    function handleCurrentData(currentJson) {
+    function handleCurrentWeather(currentJson) {
         const dateTime=new Date(currentJson["current"]["time"]);
-        setCurrentData({
+        setCurrentWeather({
             currentIcon: convertIcon(currentJson["current"]["weather_code"]),
             currentTemp: currentJson["current"]["temperature"],
             feelLike: currentJson["current"]["apparent_temperature"],
@@ -235,67 +235,42 @@ function App() {
         setHourlyTempsCollection(hourlyTempsArr);
     }
 
-    function selectSearchOption(data,searchQuery) {
+    async function selectSearchOption(data,searchQuery) {
         setShowSearchOptions(false);
         setQuery(searchQuery);
         setSearchOptions([]);
+
+        const longtitude=data["longitude"];
+        const latitude=data["latitude"];
+        const timezone=data["timezone"]??"GMT";
+        await fetchHandleWeatherData(latitude,longtitude,timezone,searchQuery);
     }
 
-    useEffect(() => {
-        if(query.trim()==='') {
-            setSearchOptions([]);
-            return;
-        }
-        const timeoutId=setTimeout(async () => {
-            try {
-                const longlatRes=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=en&format=json`);
-                const data=await longlatRes.json();
-                if(!data.results) {
-                    setSearchOptions([]);
-                    console.log("no results");
-                    if(isApiError) {
-                        setIsApiError(false);
-                    }
-                    setIsResult(false);
-                    return;
-                }
-
-                console.log("there are some results");
-                setSearchOptions(data.results);
-                console.log(data.results);
-            } catch(error) {
-                console.error("Error fetching data:",error);
-            }
-        },700);
-        return () => clearTimeout(timeoutId)
-    },[query]);
-
-    async function searchWeather() {
+    async function fetchLocationDatas() {
         try {
-            setIsSearching(true);
-
             const longlatRes=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=en&format=json`);
-            if(longlatRes.status!==200) {
-                throw new Error("Failed to fetch api");
-            }
-
-            const longlatJson=await longlatRes.json();
-
-            if(!longlatJson.results) {
-                console.log("no results");
+            const data=await longlatRes.json();
+            if(!data.results) {
+                console.log("found no result matching input query");
                 if(isApiError) {
                     setIsApiError(false);
                 }
                 setIsResult(false);
-                return;
+                return null;
             }
 
-            /*console.log(longlatJson.results[0]);*/
-            const longtitude=longlatJson.results[0]["longitude"];
-            const latitude=longlatJson.results[0]["latitude"];
-            const timezone=longlatJson.results[0]["timezone"]??"GMT";
-            setSearchName(longlatJson.results[0]["name"]);
-            setCountry(longlatJson.results[0]["country"]);
+            return data.results;
+        }
+        catch(error) {
+            setIsApiError(true);
+            console.error("Error fetching data:",error);
+            return null;
+        }
+    }
+
+    async function fetchHandleWeatherData(latitude, longtitude, timezone, location) {
+        try {
+            setLocationName(location);
             const apiString=`https://api.open-meteo.com/v1/forecast`;
             const latitudeString=`latitude=${latitude}`;
             const longtitudeString=`longitude=${longtitude}`;
@@ -313,7 +288,7 @@ function App() {
             }
 
             const weatherJson=await weatherData.json();
-            handleCurrentData(weatherJson);
+            handleCurrentWeather(weatherJson);
 
             const dailyData=await fetch(`${commonFetch}&timezone=${timezone}&${fetchDailyTemp}`);
             if(dailyData.status!==200) {
@@ -339,15 +314,47 @@ function App() {
                 setIsApiError(false);
             }
         }
-
         catch(error) {
-            //API connect error here
-            setIsApiError(true);
             console.log(error);
+            setIsApiError(true);
         }
-        finally {
-            setIsSearching(false);
+    }
+
+    useEffect(() => {
+        if(query.trim()==='') {
+            setSearchOptions([]);
+            return;
         }
+
+        const timeoutId=setTimeout(async () => {
+            const locationDatas=await fetchLocationDatas();
+            setSearchOptions(locationDatas ?? []);
+        },700);
+
+        return () => clearTimeout(timeoutId)
+    },[query]);
+
+    async function searchWeather() {
+        setSearchOptions([]);
+        setShowSearchOptions(false);
+        const locationDatas= await fetchLocationDatas();
+        if(locationDatas===null||locationDatas.length===0) {
+            return;
+        }
+
+        console.log(locationDatas);
+        const longtitude=locationDatas[0]["longitude"];
+        const latitude=locationDatas[0]["latitude"];
+        const timezone=locationDatas[0]["timezone"]??"GMT";
+        let location=locationDatas[0].name;
+        if(locationDatas[0].country) {
+            location+=", "+locationDatas[0].country;
+        }
+        if(locationDatas[0].admin1) {
+            location+=", "+locationDatas[0].admin1;
+        }
+
+        await fetchHandleWeatherData(latitude,longtitude,timezone,location);
     }
 
     useEffect(() => {
@@ -390,9 +397,8 @@ function App() {
                             (
                                 <>
                                     <CurrentWeather
-                                        currentData={currentData}
-                                        searchName={searchName}
-                                        country={country}
+                                        currentWeather={currentWeather}
+                                        locationName={locationName}
                                         tempUnit={tempUnit}
                                         speedUnit={speedUnit}
                                         precipitationUnit={precipitationUnit} />

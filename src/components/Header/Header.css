@@ -5,7 +5,7 @@
     align-items: center;
 }
 
-.wrapper_unit-settings{
+.wrapper_submenu{
     position: fixed;
     top:0;
     right:0;
@@ -15,7 +15,7 @@
     z-index: 100;
 }
 
-.unit-settings{
+.submenu{
     position: absolute;
     right: 0;
     top: 2.5rem;
@@ -26,7 +26,7 @@
     border-radius:0.5rem;
 }
 
-.unit-settings .unit-settings__settings{
+.submenu .submenu__settings{
     padding-left: 0.5rem;
     padding-right: 0.5rem;
 }

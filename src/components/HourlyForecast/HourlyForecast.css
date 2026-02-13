@@ -5,12 +5,32 @@
     border: 0.1rem solid var(--neutral-600);
     padding: 0.5rem;
     border-radius: 0.5rem;
+    cursor: pointer;
 }
 
-.container__hourly-forecast ul{
+.container__hourly-forecast select:hover, .container__hourly-forecast select:focus{
+    opacity: 0.8;
 }
 
-.container__hourly-forecast li {
+.container__hourly-forecast select:active{
+    opacity: 0.6;
+}
+.container__day-selection{
+    position: relative;
+}
+
+.container__day-selection ul{
+    position: absolute;
+    top: 2rem;
+    left:0;
+    padding: 0.5rem;
+    background-color: var(--neutral-800);
+    width: 12rem;
+    z-index: 101;
+    border-radius:0.5rem;
+}
+
+.hourly-temps li {
     height: 2.5rem;
     background-color: var(--neutral-700);
     border: 0.1rem solid var(--neutral-600);
@@ -22,12 +42,12 @@
     position: relative;
 }
 
-.container__hourly-forecast li p:last-child {
+.hourly-temps li p:last-child {
     position: absolute;
     right: 1rem;
 }
 
-.container__hourly-forecast li img{
+.hourly-temps li img{
     width: 2rem;
     height: 2rem;
 }
