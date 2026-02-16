@@ -91,7 +91,7 @@ img {
 
 button{
     cursor: pointer;
-    font-family: "DMSans Medium";
+    font-family: "DMSans Medium", sans-serif;
     font-size: 0.9rem;
 }
 .icon-btn{

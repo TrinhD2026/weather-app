@@ -14,9 +14,9 @@ function Header({unitSetting,switchUnitSetting=null}) {
     return (
         <div className="container__header">
             <img src="/logo.svg" alt="weather logo" />
-            <button className="icon-btn dropdown-btn" onClick={() => setIsSubmenuHidden(!isSubmenuHidden)}>
+            <button type="button" className="icon-btn dropdown-btn" onClick={() => setIsSubmenuHidden(!isSubmenuHidden)}>
                 <img src="/icon-units.svg" alt="units icon" />
-                <p>Units</p>
+                Units
                 <img src="/icon-dropdown.svg" alt="dropdown icon" />
             </button>
             {!isSubmenuHidden&&

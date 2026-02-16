@@ -394,8 +394,8 @@ function App() {
                                         selectSearchOption={selectSearchOption} />
                                 }
                             </div>
-                            
-                            <button className="seacrh-btn" onClick={searchWeather}>Search</button>
+
+                            <button type="button" className="seacrh-btn" onClick={searchWeather}>Search</button>
                         </div>
                         
                         {isResult?
