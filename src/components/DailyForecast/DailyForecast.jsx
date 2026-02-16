@@ -3,9 +3,9 @@ import './DailyForecast.css';
 
 function DailyForecast({dailyTemps,tempUnit}) {
     return (
-        <div>
+        <div className="container__daily-forecast">
             <h2>Daily forecast</h2>
-            <ul className="container__daily-forecast">
+            <ul className="forecast">
                 {
                     dailyTemps.map(data => {
                         return (

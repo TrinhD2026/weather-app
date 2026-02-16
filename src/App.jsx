@@ -8,9 +8,11 @@ import ApiError from './components/ApiError/ApiError.jsx';
 import SearchOptions from './components/SearchOptions/SearchOptions.jsx';
 
 function App() {
+    const tempUnit="\u00BA";
+
     const [searchOptions,setSearchOptions]=useState([]);
     const [showSearchOptions,setShowSearchOptions]=useState(false);
-    const [isSearching,setIsSearching]=useState(false);
+/*    const [isSearching,setIsSearching]=useState(false);*/
     const [isResult,setIsResult]=useState(false);
     const [isApiError,setIsApiError]=useState(false);
 
@@ -19,7 +21,6 @@ function App() {
     const [hourlyTempsCollection,setHourlyTempsCollection]=useState([]);
     const [unitSetting,setUnitSetting]=useState("metric");
     const [tempUnitSetting,setTempUnitSetting]=useState("celsius");
-    const [tempUnit,setTempUnit]=useState("\u00BAC");
     const [speedUnit,setSpeedUnit]=useState("kmh");
     const [precipitationUnit,setPrecipitationUnit]=useState("mm");
 
@@ -75,13 +76,11 @@ function App() {
 
     function switchUnitSetting() {
         if(unitSetting==="metric") {
-            setTempUnit("\u00BAF");
             setTempUnitSetting("fahrenheit");
             setPrecipitationUnit("inch");
             setSpeedUnit("mph");
         }
         else {
-            setTempUnit("\u00BAC");
             setTempUnitSetting("celsius");
             setPrecipitationUnit("mm");
             setSpeedUnit("kmh");
@@ -372,30 +371,33 @@ function App() {
                 (
                     <>
                         <h1>How's the sky looking today?</h1>
-                        <div className="container__search-input">
-                            <img src="/icon-search.svg" alt="search icon" />
-                            <input
-                                id="search"
-                                type="search"
-                                placeholder="Search for a place..."
-                                aria-describedby="search-description"
-                                value={query}
-                                onChange={(e) => {
-                                    setQuery(e.target.value);
-                                    if(!showSearchOptions) {
-                                        setShowSearchOptions(true);
-                                    }
-                                } }
-                            />
+                        <div className="container__search-inputs">
+                            <div className="container__search-box">
+                                <img src="/icon-search.svg" alt="search icon" />
+                                <input
+                                    id="search"
+                                    type="search"
+                                    placeholder="Search for a place..."
+                                    aria-describedby="search-description"
+                                    value={query}
+                                    onChange={(e) => {
+                                        setQuery(e.target.value);
+                                        if(!showSearchOptions) {
+                                            setShowSearchOptions(true);
+                                        }
+                                    }}
+                                />
+                            </div>
+                            {(searchOptions.length>0&&showSearchOptions)&&
+                                <SearchOptions searchOptions={searchOptions}
+                                    selectSearchOption={selectSearchOption} />
+                            }
+                            <button className="seacrh-btn" onClick={searchWeather}>Search</button>
                         </div>
-                        {(searchOptions.length>0&&showSearchOptions)&&
-                            <SearchOptions searchOptions={searchOptions}
-                                selectSearchOption={selectSearchOption} />
-                        }
-                        <button className="seacrh-btn" onClick={searchWeather}>Search</button>
+                        
                         {isResult?
                             (
-                                <>
+                                <div className="container__data">
                                     <CurrentWeather
                                         currentWeather={currentWeather}
                                         locationName={locationName}
@@ -406,7 +408,7 @@ function App() {
                                         tempUnit={tempUnit} />
                                     <HourlyForecast hourlyTempsCollection={hourlyTempsCollection}
                                         tempUnit={tempUnit} />
-                                </>
+                                </div>
                             ):
                             (
                                 <h2 className="no-result-header">No search result found!</h2>

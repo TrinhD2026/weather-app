@@ -15,6 +15,7 @@
 .container__hourly-forecast select:active{
     opacity: 0.6;
 }
+
 .container__day-selection{
     position: relative;
 }
@@ -50,4 +51,12 @@
 .hourly-temps li img{
     width: 2rem;
     height: 2rem;
+}
+
+@media screen and (width >= 65rem){
+    .hourly-temps{
+        max-height: 30rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
 }

@@ -6,20 +6,22 @@ function CurrentWeather({locationName,
     currentWeather}) {
 
     return (
-        <div>
+        <div className="container__current-weather">
             <div className="container__overall-result">
                 <picture>
-                    <source srcSet="/bg-today-small.svg" media="(max-width: 52rem)" />
-                    <source srcSet="/bg-today-large.svg" media="(min-width: 52rem)" />
+                    <source srcSet="/bg-today-small.svg" media="(max-width: 60rem)" />
+                    <source srcSet="/bg-today-large.svg" media="(min-width: 60rem)" />
                     <img src="/bg-today-small.svg" alt="today background image" />
                 </picture>
                 {
                     currentWeather&&
                     (
                         <div className="today-result">
-                            <h2>{locationName}</h2>
-                            <p>{`${currentWeather.day}, ${currentWeather.month} ${currentWeather.date}, ${currentWeather.year}`}</p>
-                            <div>
+                            <div className="today-result__date-location">
+                                <h2>{locationName}</h2>
+                                <p>{`${currentWeather.day}, ${currentWeather.month} ${currentWeather.date}, ${currentWeather.year}`}</p>
+                            </div>
+                            <div className="today-result__temperature">
                                 <img src={currentWeather.currentIcon} alt="weather icon" />
                                 <p>{currentWeather.currentTemp!=null? `${currentWeather.currentTemp} ${tempUnit}`:''}</p>
                             </div>

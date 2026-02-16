@@ -1,10 +1,10 @@
-.container__daily-forecast{
+.container__daily-forecast .forecast{
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
 }
 
-.container__daily-forecast li{
+.container__daily-forecast .forecast li{
     min-width: 5rem;
     height: 10rem;
     background-color: var(--neutral-800);
@@ -18,16 +18,21 @@
     align-items: center;
 }
 
-.container__daily-forecast li img {
+.container__daily-forecast .forecast li img {
     width: 5rem;
     height: 5rem;
 }
 
-.container__daily-forecast li div{
+.container__daily-forecast .forecast li div{
     width: 100%;
     display: flex;
     justify-content: space-between;
     font-size: 0.8rem;
     padding: 0 0.5rem;
     align-items: center;
+}
+@media screen and (width >= 65rem){
+    .container__daily-forecast .forecast{
+        grid-template-columns: repeat(7, 1fr);
+    }
 }

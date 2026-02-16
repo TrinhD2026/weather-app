@@ -68,13 +68,6 @@ body {
     align-items: center;
 }
 
-#root{
-    max-width: 32rem;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-}
-
 li{
     list-style: none;
 }

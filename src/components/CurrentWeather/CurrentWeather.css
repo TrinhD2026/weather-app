@@ -1,7 +1,7 @@
 
 .container__overall-result{
     min-height: 15rem;
-    margin: 1rem 0;
+    margin-bottom: 1rem;
     position: relative;
 }
 
@@ -24,18 +24,21 @@
     gap: 1rem;
 }
 
-.container__overall-result .today-result div{
+.container__overall-result .today-result .today-result__date-location p{
+    color: var(--neutral-300);
+}
+.container__overall-result .today-result .today-result__temperature{
     display: flex;
     justify-content:center;
     align-items: center;
 }
 
-.container__overall-result .today-result div img{
+.container__overall-result .today-result .today-result__temperature img{
     width: 5rem;
     height: 5rem;
 }
 
-.container__overall-result .today-result div p{
+.container__overall-result .today-result .today-result__temperature p{
     font-size: 5rem;
     font-weight: 700;
 }
@@ -60,4 +63,16 @@
 .container__result-details div p{
     margin-top: 1rem;
     font-size: 1.5rem;
+}
+
+@media screen and (width >= 65rem){
+    .container__result-details{
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .container__overall-result .today-result {
+        flex-direction:row;
+        justify-content: space-between;
+        text-align: left;
+    }
 }
