@@ -372,26 +372,29 @@ function App() {
                     <>
                         <h1>How's the sky looking today?</h1>
                         <div className="container__search-inputs">
-                            <div className="container__search-box">
-                                <img src="/icon-search.svg" alt="search icon" />
-                                <input
-                                    id="search"
-                                    type="search"
-                                    placeholder="Search for a place..."
-                                    aria-describedby="search-description"
-                                    value={query}
-                                    onChange={(e) => {
-                                        setQuery(e.target.value);
-                                        if(!showSearchOptions) {
-                                            setShowSearchOptions(true);
-                                        }
-                                    }}
-                                />
+                            <div className="container__search-locations">
+                                <div className="container__search-box">
+                                    <img src="/icon-search.svg" alt="search icon" />
+                                    <input
+                                        id="search"
+                                        type="search"
+                                        placeholder="Search for a place..."
+                                        aria-describedby="search-description"
+                                        value={query}
+                                        onChange={(e) => {
+                                            setQuery(e.target.value);
+                                            if(!showSearchOptions) {
+                                                setShowSearchOptions(true);
+                                            }
+                                        }}
+                                    />
+                                </div>
+                                {(searchOptions.length>0&&showSearchOptions)&&
+                                    <SearchOptions searchOptions={searchOptions}
+                                        selectSearchOption={selectSearchOption} />
+                                }
                             </div>
-                            {(searchOptions.length>0&&showSearchOptions)&&
-                                <SearchOptions searchOptions={searchOptions}
-                                    selectSearchOption={selectSearchOption} />
-                            }
+                            
                             <button className="seacrh-btn" onClick={searchWeather}>Search</button>
                         </div>
                         

@@ -16,7 +16,16 @@
     grid-template-columns: 1fr;
     margin: 0 auto;
 }
-
+.container__search-locations{
+    position: relative;
+}
+.search-options{
+    position: absolute;
+    top: 2.5rem;
+    left: 0;
+    width: 100%;
+    z-index:101;
+}
 .container__search-box{
     display: flex;
     background-color: var(--neutral-800);
